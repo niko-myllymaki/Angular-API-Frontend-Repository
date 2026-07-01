@@ -1,0 +1,18 @@
+<p>{{homeTitle()}}</p>
+@if (messageToShow.length > 0) {
+    <p class="error">{{messageToShow}}</p>
+}
+
+<main>
+    <input name="username" [(ngModel)] = "username" placeholder="Username here..."><br>
+    <input name="password" [(ngModel)] = "password" placeholder="Password here..."><br>
+    <input name="permission" [(ngModel)] = "permissions" placeholder="Permission here..."><br>
+    @for (role of roles; track role) {
+        <input [checked]="accepted" (change)="onChange(role)" type="checkbox" value="{{ role }}" />{{role}}<br>
+    }
+   
+    <button (click)="buttonClicked()">Sign up</button>
+
+    <p>API Response: {{ response() }}</p>
+
+</main>

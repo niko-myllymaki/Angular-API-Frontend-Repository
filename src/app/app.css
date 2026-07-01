@@ -1,0 +1,11 @@
+main {
+    padding: 16px;
+    color: rebeccapurple;
+}
+
+button {
+    cursor: pointer;
+    &:hover {
+        filter: brightness(85%);
+    }
+}

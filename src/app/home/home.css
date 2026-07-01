@@ -1,0 +1,10 @@
+.error {
+    color: red;
+}
+
+button {
+    cursor: pointer;
+    &:hover {
+        filter: brightness(85%);
+    }
+}
