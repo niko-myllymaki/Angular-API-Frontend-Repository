@@ -1,18 +1,43 @@
 <p>{{homeTitle()}}</p>
-@if (messageToShow.length > 0) {
-    <p class="error">{{messageToShow}}</p>
-}
 
 <main>
-    <input name="username" [(ngModel)] = "username" placeholder="Username here..."><br>
-    <input name="password" [(ngModel)] = "password" placeholder="Password here..."><br>
-    <input name="permission" [(ngModel)] = "permissions" placeholder="Permission here..."><br>
-    @for (role of roles; track role) {
-        <input [checked]="accepted" (change)="onChange(role)" type="checkbox" value="{{ role }}" />{{role}}<br>
-    }
+    <input [ngClass]="{'red-background':usernameError, '':!usernameError}" name="username" [(ngModel)] = "username" placeholder="Username here..."><br>
+    @if (usernameError) {
+        <p class="error">{{messages.errors.userFieldEmpty}}</p>
+    } 
+    <input [ngClass]="{'red-background':passwordError, '':!passwordError}" type="password" name="password" [(ngModel)] = "password" placeholder="Password here..."><br>
+    @if (passwordError) {
+        <p class="error">{{messages.errors.passwordFieldEmpty}}</p>
+    } 
+    <div [ngClass]="{'role-error-background':roleError, '':!roleError}">
+        @for (role of roles; track role) {
+            <input [checked]="accepted" (change)="onChange(role)" type="checkbox" value="{{ role }}" />{{role}}<br>
+        }
+    </div>
+    @if (roleError) {
+        <p class="error">{{messages.errors.roleFieldEmpty}}</p>
+    } 
+
    
-    <button (click)="buttonClicked()">Sign up</button>
+    <button (click)="signUpClicked()">Sign up</button>
 
     <p>API Response: {{ response() }}</p>
 
 </main>
+
+<!--
+
+    <input [ngClass]="{'red-background':makeError, '':!makeError}" placeholder="Password here..."><br>
+
+    <p [ngClass]="{'red-background':makeError, 'purple-background':!makeError}">What</p>
+
+    <input [ngClass]="{'red-background':makeError}" placeholder="Password here..."><br>
+
+    <div [ngClass]="{'red-background':makeError, '':!makeError}">
+    </div>
+
+<p>{{homeTitle()}}</p>
+@if (messageToShow.length != 0) {
+    <p class="error">{{messageToShow()}}</p>
+}
+-->

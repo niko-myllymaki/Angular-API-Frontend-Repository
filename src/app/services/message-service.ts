@@ -13,6 +13,10 @@ export class MessageService {
     this.behaviorSubject.next(data);
   }
 
+  clearMessage() {
+    this.behaviorSubject.next("");
+  }
+
   getMessage(): Observable<any> {
     return this.behaviorSubject.asObservable();
   }

@@ -2,12 +2,14 @@ import { Component, signal, inject, OnInit, OnDestroy} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthenticationService } from '../services/authentication';
 import { UserInfo } from '../model/userInfo';
-import { catchError, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { MessageService } from '../services/message-service';
+import { CommonModule } from '@angular/common';
+import { MESSAGES } from '../constants/message.constants';
 
 @Component({
   selector: 'app-home',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -17,84 +19,114 @@ export class Home implements OnInit, OnDestroy {
   authService = inject(AuthenticationService);
   username = "";
   password = "";
-  permissions = "";
-  test = "";
-  messageToShow : string = "";
+  errorMessage = signal("");
   subscription!: Subscription;
   roles: string[] = ['User', 'Moderator', 'Admin'];
-  allSelectedValues: string[] = [];
+  allSelectedRoles: string[] = [];
   rolesProperty: {name : string}[] = [];
-  accepted: Boolean | undefined;
+  accepted: boolean | undefined;
+  usernameError: boolean = false;
+  passwordError: boolean = false;
+  roleError: boolean = false;
+  messages = MESSAGES;
 
   constructor(private messageService : MessageService) {}
 
   ngOnInit() {
       this.subscription = this.messageService.getMessage().subscribe(message => {
-      console.log(message);
-      if(message) {
-        this.messageToShow = message;
-      } else {
-        this.messageToShow = "";
-      }
-    })
+        console.log(message);
+        this.errorMessage.set(message);
+      })
   }
 
   ngOnDestroy() {
-    this.messageService.sendMessage("");
+    this.messageService.clearMessage();
     this.subscription.unsubscribe();
     console.log("Unsubscribed!");
   }
 
   onChange(value: string): void {
-    let valueToUpperCase = value.toUpperCase();
-    if (this.allSelectedValues.includes(valueToUpperCase)) {
-      this.allSelectedValues = this.allSelectedValues.filter((item) => item !== valueToUpperCase);
+    let roleToUpperCase = value.toUpperCase();
+    if (this.allSelectedRoles.includes(roleToUpperCase)) {
+      this.allSelectedRoles = this.allSelectedRoles.filter((item) => item !== roleToUpperCase);
     } else {
-      this.allSelectedValues.push(valueToUpperCase);
+      this.allSelectedRoles.push(roleToUpperCase);
     }
-    console.log(this.allSelectedValues);
+    console.log(this.allSelectedRoles);
   }
 
-  buttonClicked() {
+  signUpClicked() {
     type roleProperty = {
       name : string;
     };
 
-    console.log(this.username + " " + this.password + " " + this.allSelectedValues + " " + this.permissions)
-    for(var val of this.allSelectedValues) {
-      const testRole : roleProperty = {
+    this.usernameError = false;
+    this.passwordError = false;
+    this.roleError = false;
+
+    this.checkIfUserDataIsEmpty();
+
+    console.log(this.username + " " + this.password + " " + this.allSelectedRoles)
+    for(var val of this.allSelectedRoles) {
+      const role : roleProperty = {
         name : val
       }
-      this.rolesProperty.push(testRole)
+      this.rolesProperty.push(role)
     }
 
     const userSignUpInfo : UserInfo = {
       username : this.username,
       password : this.password,
       roles : this.rolesProperty,
-      permissions : [{
-        name : this.permissions
-      }]
     }
 
     this.callSignUpApi(userSignUpInfo);
 
     this.username = "";
     this.password = "";
-    this.allSelectedValues = [];
-    this.permissions = "";
+    this.allSelectedRoles = [];
     this.accepted = false;
   }
 
   //Observable is returned in the service, while subscribing is done in the component.
   callSignUpApi(user : UserInfo) {
-    this.authService.submitUserWithApi(user).pipe(catchError((err) => {
-      console.log(err);
-      throw err;
-    }))
+    this.authService.submitUserWithApi(user)
     .subscribe((apiResponse) => {
       this.response.set(apiResponse);
     });
 
   }
+
+  private checkIfUserDataIsEmpty() {
+    if (!this.username) {
+      this.usernameError = true;
+    }
+
+    if (!this.password) {
+      this.passwordError = true;
+    }
+
+    if (this.allSelectedRoles.length == 0) {
+      this.roleError = true;
+    }
+
+    if (this.usernameError || this.passwordError || this.roleError) {
+      throw new Error("Error with user input fields.");
+    }
+  }
 }
+
+
+
+
+
+/*
+.pipe(catchError((err) => {
+      //Should consider an error handler
+      let httpErr: HttpErrorResponse = err;
+      let strErr: string = httpErr.error;
+      this.response.set(strErr.match(/"message":"([^"]*)"/)?.[1]!);
+      throw err;
+    })) 
+      
+*/
